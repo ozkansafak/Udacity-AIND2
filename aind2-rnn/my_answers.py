@@ -2,7 +2,7 @@ import numpy as np
 
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM
+from keras.layers import LSTM, Activation
 import keras
 
 
@@ -41,10 +41,12 @@ def cleaned_text(text):
     text = text.replace('è', 'e')
     text = text.replace('â', 'a')
     text = text.replace('à', 'a')
-
-    white_spaces = ['%', '@', '$', '&', '*', '(', ')', '/', ':']
-    for c in white_spaces:
-        text = text.replace(c, ' ')
+    
+    keep = 'abcdefghijklmnopqrstuvwxyz !,.:;?'
+    chars = set(text)
+    for c in chars:
+        if not c in (keep):
+            text = text.replace(c, ' ')
     
     return text
 
@@ -64,8 +66,8 @@ def window_transform_text(text, window_size, step_size):
 # a single LSTM hidden layer with softmax activation, categorical_crossentropy loss 
 def build_part2_RNN(window_size, num_chars):
     model = Sequential()
-    model.add(LSTM(200, input_shape=(window_size,num_chars)))
-    model.add(Dense(100, activation='linear'))
-    model.add(Dense(45, activation='softmax'))
+    model.add(LSTM(256, return_sequences=True, input_shape=(window_size, num_chars)))
+    model.add(LSTM(256))
+    model.add(Dense(num_chars, activation='softmax'))
     
     return model
